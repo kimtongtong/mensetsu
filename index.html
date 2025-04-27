@@ -1,22 +1,23 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ランダム質問カードゲーム-ルートイン</title>
+  <title>ランダム質問カードゲーム</title>
   <style>
-    /* 기본 리셋 */
+    /* 글로벌 기본 리셋 및 바디 배경 */
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
+    body {
+      background: #f0f0f0;
+    }
     
     /* ===== 시작 화면 ===== */
     #startContainer {
-      position: relative;
-      width: 100vw;
+      width: 100vw; /* 전체 화면 너비 */
       height: 100vh;
       background: #f0f0f0;
       overflow: hidden;
@@ -24,7 +25,10 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
+      position: relative;
       z-index: 10;
+      /* 여백은 내부에서 버튼, 제목에 충분히 적용됨 */
+      padding: 10px;
     }
     .bubble-container {
       position: absolute;
@@ -47,6 +51,7 @@
       50% { opacity: 0.3; }
       100% { transform: translateY(-110vh) scale(1.5); opacity: 0; }
     }
+    /* 제목 및 게임 시작 버튼 */
     #startContainer h1,
     #startContainer button {
       position: relative;
@@ -75,14 +80,14 @@
     /* ===== 게임 화면 ===== */
     #gameContainer {
       display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
       width: 100vw;
       height: 100vh;
       background: #f0f0f0;
       padding: 15px;
       overflow: hidden;
+      position: fixed;
+      top: 0;
+      left: 0;
       z-index: 20;
     }
     #resetContainer {
@@ -102,12 +107,16 @@
     .reset-button:hover {
       background: #a71d2a;
     }
+    /* 질문 카드 그리드: 상하, 좌측 여백은 50px, 우측은 20px */
     #questionGrid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 15px;
+      /* 상, 좌, 하, 우 padding: 50px 20px 50px 50px */
+      padding: 50px 20px 50px 50px;
+      /* 상단 리셋 영역 (약 80px)을 감안해서 높이 계산 */
+      height: calc(100vh - 80px - 100px);
       overflow-y: auto;
-      height: calc(100vh - 80px);
     }
     /* 모바일 대응 */
     @media (max-width: 600px) {
@@ -181,8 +190,9 @@
       z-index: 150;
       justify-content: center;
       align-items: center;
+      padding: 10px;
     }
-    /* 모달 카드: 원 카드의 약 3배 크기 (최대 600px) */
+    /* 모달 카드: 원 카드의 3배 크기 (최대 600px) */
     #modalCard {
       width: min(90vw, 600px);
       background: white;
@@ -201,7 +211,7 @@
       font-weight: bold;
       color: inherit;
     }
-    /* 모달 내 질문 텍스트: 폰트 사이즈를 1.5rem, 굵게 표시 */
+    /* 모달 내 질문 텍스트: 1.5rem, 굵게 표시 */
     #modalCard .question {
       margin-bottom: 20px;
       font-size: 1.5rem;
@@ -236,7 +246,7 @@
       <div class="bubble" style="left: 60%; width: 40px; height: 40px; background: rgba(255,150,50,0.3); animation-duration: 9s; animation-delay: 2.5s;"></div>
       <div class="bubble" style="left: 40%; width: 110px; height: 110px; background: rgba(150,50,255,0.3); animation-duration: 16s; animation-delay: 3.5s;"></div>
     </div>
-    <h1>ランダム質問カードゲーム（ルートイン）</h1>
+    <h1>ランダム質問カードゲーム</h1>
     <button id="startBtn">ゲーム 시작</button>
   </div>
   
@@ -279,7 +289,6 @@
       const questionGrid = document.getElementById("questionGrid");
       const modalContainer = document.getElementById("modalContainer");
       
-      // 배경색과 글씨색 결정 함수 (light 70→"black", 40→"white")
       function getDistinctColors(count) {
         const colors = [];
         const offset = Math.floor(Math.random() * 360);
@@ -350,7 +359,7 @@
             flipCard.classList.remove("card-shuffle");
           });
       
-          // 카드 클릭 시 모달 열기. 그 자리에 있는 카드는 그대로 유지
+          // 카드 클릭 시 모달 열기 (클릭한 카드의 그리드 위치는 그대로 유지)
           flipCard.addEventListener("click", function () {
             const currentCard = flipCard;
       
@@ -362,13 +371,13 @@
             modalCard.id = "modalCard";
             modalCard.style.backgroundColor = inner.style.backgroundColor;
       
-            // 타이머: 질문 텍스트 바로 위에 배치
+            // 타이머: 질문 텍스트 바로 위
             const modalTimer = document.createElement("div");
             modalTimer.className = "timer";
             modalTimer.style.fontSize = "2rem";
             modalTimer.style.marginBottom = "10px";
       
-            // 질문 텍스트: 원 카드보다 작은 폰트 사이즈, 1.5rem로 크게, 굵게 표시
+            // 질문 텍스트: 원 카드보다 크게 1.5rem, 굵게 표시
             const modalQuestion = document.createElement("div");
             modalQuestion.className = "question";
             modalQuestion.textContent = q;
@@ -383,7 +392,7 @@
             backBtn.addEventListener("click", function () {
               clearInterval(modalInterval);
               modalContainer.style.display = "none";
-              // 해당 카드의 영역은 그대로 남으면서도, 텍스트를 지워 빈 셀처럼 표시
+              // 클릭한 카드의 영역은 그대로 유지되지만, 빈 셀처럼 보이도록 함
               currentCard.style.visibility = "hidden";
             });
       
